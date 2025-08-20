@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import QuoteModal from '@/components/QuoteModal';
 
+
+
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const [selectedQuantity, setSelectedQuantity] = useState('500g');

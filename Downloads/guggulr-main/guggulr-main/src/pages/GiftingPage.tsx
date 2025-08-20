@@ -1,14 +1,28 @@
-import React from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Gift, Heart, Building, Star } from 'lucide-react';
+import { Gift, Heart, Building, Star, QrCode } from 'lucide-react';
+import hamper1 from '../assets/Gifts_Website/1.png'
+import hamper2 from '../assets/Gifts_Website/2.png'
+import hamper3 from '../assets/Gifts_Website/3.png'
+import hamper4 from '../assets/Gifts_Website/4.png'
+import hamper5 from '../assets/Gifts_Website/5.png'
+
+type GiftHamper = {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  rating: number;
+  category: string;
+};
 
 const GiftingPage = () => {
-  const giftHampers = [
+  const giftHampers: GiftHamper[] = [
     {
       id: 1,
       name: 'Luxury Nut Collection',
       description: 'Premium assortment of almonds, cashews, pistachios, and walnuts',
-      image: 'Luxury gift box with premium nuts assortment',
+      image: hamper1,
       rating: 4.9,
       category: 'Premium',
     },
@@ -16,7 +30,7 @@ const GiftingPage = () => {
       id: 2,
       name: 'Spice Master\'s Choice',
       description: 'Exotic spices collection with saffron, cardamom, and premium blends',
-      image: 'Elegant spice gift set with golden packaging',
+      image: hamper2,
       rating: 4.8,
       category: 'Exotic',
     },
@@ -24,7 +38,7 @@ const GiftingPage = () => {
       id: 3,
       name: 'Corporate Excellence',
       description: 'Perfect for corporate gifting with branded packaging options',
-      image: 'Professional corporate gift hamper with branding',
+      image: hamper3,
       rating: 4.9,
       category: 'Corporate',
     },
@@ -32,7 +46,7 @@ const GiftingPage = () => {
       id: 4,
       name: 'Festival Special',
       description: 'Traditional dry fruits and sweets for festive celebrations',
-      image: 'Festive gift hamper with traditional elements',
+      image: hamper4,
       rating: 4.7,
       category: 'Festival',
     },
@@ -40,7 +54,7 @@ const GiftingPage = () => {
       id: 5,
       name: 'Health & Wellness',
       description: 'Nutritious nuts, seeds, and organic spices for healthy living',
-      image: 'Wellness-focused gift collection',
+      image: hamper5,
       rating: 4.8,
       category: 'Wellness',
     },
@@ -48,30 +62,38 @@ const GiftingPage = () => {
       id: 6,
       name: 'Gourmet Experience',
       description: 'Curated selection of rare spices and premium nuts from around the world',
-      image: 'Gourmet gift collection with international selection',
+      image: '/images/gourmet-hamper.jpg',
       rating: 4.9,
       category: 'Gourmet',
     },
   ];
 
-  const handleCustomizeHamper = (hamper) => {
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [selectedProductForQR, setSelectedProductForQR] = useState<GiftHamper | null>(null);
+
+  const handleQRView = (hamper: GiftHamper) => {
+    setSelectedProductForQR(hamper);
+    setIsQRModalOpen(true);
+  };
+
+  const handleCustomizeHamper = (hamper: GiftHamper) => {
     alert(`🚧 Customization for "${hamper.name}" isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀`);
   };
 
-  const handleQuoteRequest = (hamper) => {
+  const handleQuoteRequest = (hamper: GiftHamper) => {
     alert(`📞 Quote request for "${hamper.name}" submitted! We'll contact you soon with pricing details.`);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-orange-600 via-red-500 to-rose-500 text-white py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-orange-500 to-red-500 text-white py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
         {/* Decorative Blobs - matching ProductsPage */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute -top-10 sm:-top-20 -left-10 sm:-left-20 w-40 h-40 sm:w-72 sm:h-72 bg-orange-400 rounded-full blur-2xl sm:blur-3xl animate-pulse" />
           <div className="absolute bottom-0 right-0 w-60 h-60 sm:w-96 sm:h-96 bg-red-400 rounded-full blur-2xl sm:blur-3xl animate-pulse" />
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -79,12 +101,15 @@ const GiftingPage = () => {
             transition={{ duration: 0.6 }}
             className="max-w-4xl mx-auto"
           >
-            <Gift className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 drop-shadow-lg" />
-            <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 sm:mb-6 drop-shadow-lg">
-              Gifting & Hampers
-            </h1>
+            <div className="flex items-center justify-center space-x-4 mb-4 sm:mb-6 drop-shadow-lg">
+              <Gift className="w-12 h-12 sm:w-16 sm:h-16" />
+              <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+                Gifting & Hampers
+              </h1>
+            </div>
+
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-orange-100 max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto leading-relaxed px-4">
-              Create memorable moments with our elegantly curated gift hampers.  
+              Create memorable moments with our elegantly curated gift hampers.
               Perfect for personal celebrations and corporate excellence.
             </p>
           </motion.div>
@@ -179,7 +204,11 @@ const GiftingPage = () => {
                     transition={{ duration: 0.6 }}
                     alt={hamper.name}
                     className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                    src="https://images.unsplash.com/photo-1689009755101-9fa2f09bcc86"
+                    src={hamper.image}
+                    onError={(e) => {
+                      // Fallback to a default image if the specific image fails to load
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1689009755101-9fa2f09bcc86";
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
@@ -201,19 +230,28 @@ const GiftingPage = () => {
                     <span className="text-gray-500 text-xs sm:text-sm ml-1">({Math.floor(Math.random() * 100) + 50} reviews)</span>
                   </div>
 
-                  <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
+                  <div className="flex flex-col gap-2">
                     <button
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-md hover:shadow-xl transition-all text-sm sm:text-base font-medium"
+                      className="w-full px-3 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-md hover:shadow-xl transition-all text-sm sm:text-base font-medium"
                       onClick={() => handleQuoteRequest(hamper)}
                     >
-                      Get Quote
+                      Ask for Quote
                     </button>
-                    <button
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-orange-300 text-orange-600 hover:bg-orange-50 rounded-xl transition-all text-sm sm:text-base font-medium"
-                      onClick={() => handleCustomizeHamper(hamper)}
-                    >
-                      Customize
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        className="flex-1 px-3 py-2 sm:py-3 rounded-xl border border-orange-300 text-orange-600 hover:bg-orange-50 text-sm sm:text-base font-medium transition"
+                        onClick={() => handleCustomizeHamper(hamper)}
+                      >
+                        Customize
+                      </button>
+                      <button
+                        className="p-2 sm:p-3 rounded-xl border border-orange-300 text-orange-600 hover:bg-orange-50 transition flex-shrink-0"
+                        onClick={() => handleQRView(hamper)}
+                        title="View QR Code"
+                      >
+                        <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -259,6 +297,42 @@ const GiftingPage = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* QR Code Modal */}
+      {isQRModalOpen && selectedProductForQR && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-sm sm:max-w-md w-full"
+          >
+            <div className="text-center">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+                QR Code
+              </h3>
+              <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                {selectedProductForQR.name}
+              </p>
+              {/* QR Code Image */}
+              <div className="bg-gray-100 rounded-xl p-4 mb-6 flex items-center justify-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/product/${selectedProductForQR.id}`}
+                  alt="QR Code"
+                  className="w-48 h-48 object-contain"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => setIsQRModalOpen(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-600 rounded-xl font-medium text-sm sm:text-base"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

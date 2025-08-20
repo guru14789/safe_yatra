@@ -1,35 +1,66 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Grid, List } from 'lucide-react';
+import { Search, Filter, Grid, List, QrCode } from 'lucide-react';
+import { Package } from 'lucide-react';
+type Category = 'nuts' | 'spices';
+import almonds from '../assets/Almonds.png';
+import cashew from '../assets/4-piece Cashews.png'
+import dates from '../assets/Black Dates.png'
+import mixed from '../assets/Mixed Dry fruits.png'
+import walnut from '../assets/Walnut (kernels).png'
+import pisco from '../assets/Pistachios.png'
+import whitedates from '../assets/White Dates.png'
+import greenrasin from '../assets/Green Raisins (Type 1).png'
+import pepper from '../assets/Pepper.png'
+import turmeric from '../assets/Turmeric Stick.png'
+import cardamom from '../assets/Wild Cardamom.png';
+import cinnamim from '../assets/Singapore Cinnamon.png'
+import saffron from '../assets/Saffron.png'
+
+type Product = {
+  id: number;
+  name: string;
+  tagline: string;
+  image: string;
+};
+
+const products: Record<Category, Product[]> = {
+  nuts: [
+    { id: 1, name: 'Premium Almonds', tagline: 'California\'s finest', image:almonds },
+    { id: 2, name: 'Cashew Delight', tagline: 'Creamy & nutritious', image: cashew },
+    { id: 3, name: 'Pistachio Paradise', tagline: 'Turkish excellence', image: pisco },
+    { id: 4, name: 'Walnut Wonder', tagline: 'Brain food supreme', image: walnut },
+    { id: 5, name: 'Date Delights', tagline: 'Nature\'s candy', image: dates },
+    { id: 6, name: 'Mixed Nuts Premium', tagline: 'Perfect combination', image: mixed },
+    { id: 7, name: 'White Dates Delights', tagline: 'Rich & crunchy', image: whitedates },
+    { id : 8, name: 'Green rasins', tagline: 'Sweet & tangy', image: greenrasin },
+  ],
+  spices: [
+    { id: 9, name: 'Saffron Gold', tagline: 'Kashmir\'s treasure', image: saffron },
+    { id: 10, name: 'Cardamom Elite', tagline: 'Queen of spices', image: cardamom},
+    { id: 11, name: 'Cinnamon Bark', tagline: 'Sweet & aromatic', image: cinnamim },
+    { id: 12, name: 'Black Pepper Premium', tagline: 'King of spices', image: pepper },
+
+    { id: 13, name: 'Turmeric Gold', tagline: 'Golden healing', image: turmeric },
+  ]
+};
 
 const ProductsPage = () => {
-  const [viewMode, setViewMode] = useState('grid');
-  const [activeCategory, setActiveCategory] = useState('nuts');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeCategory, setActiveCategory] = useState<Category>('nuts');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [selectedProductForQR, setSelectedProductForQR] = useState<Product | null>(null);
 
-  const products = {
-    nuts: [
-      { id: 1, name: 'Premium Almonds', tagline: 'California\'s finest', image: 'Premium California almonds with rich flavor' },
-      { id: 2, name: 'Cashew Delight', tagline: 'Creamy & nutritious', image: 'Creamy cashews from Kerala farms' },
-      { id: 3, name: 'Pistachio Paradise', tagline: 'Turkish excellence', image: 'Turkish pistachios with natural taste' },
-      { id: 4, name: 'Walnut Wonder', tagline: 'Brain food supreme', image: 'Fresh walnuts with omega-3 richness' },
-      { id: 5, name: 'Date Delights', tagline: 'Nature\'s candy', image: 'Medjool dates with natural sweetness' },
-      { id: 6, name: 'Mixed Nuts Premium', tagline: 'Perfect combination', image: 'Premium mixed nuts assortment' },
-    ],
-    spices: [
-      { id: 7, name: 'Saffron Gold', tagline: 'Kashmir\'s treasure', image: 'Premium Kashmir saffron threads' },
-      { id: 8, name: 'Cardamom Elite', tagline: 'Queen of spices', image: 'Green cardamom pods from Western Ghats' },
-      { id: 9, name: 'Cinnamon Bark', tagline: 'Sweet & aromatic', image: 'Ceylon cinnamon sticks with sweet aroma' },
-      { id: 10, name: 'Black Pepper Premium', tagline: 'King of spices', image: 'Malabar black pepper with intense flavor' },
-      { id: 11, name: 'Clove Essence', tagline: 'Aromatic intensity', image: 'Whole cloves with rich aroma' },
-      { id: 12, name: 'Turmeric Gold', tagline: 'Golden healing', image: 'Organic turmeric powder with curcumin' },
-    ]
-  };
-
-  const handleQuickView = (product) => {
+  const handleQuickView = (product: Product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
+  };
+
+  const handleQRView = (product: Product) => {
+    setSelectedProductForQR(product);
+    setIsQRModalOpen(true);
   };
 
   const handleLoadMore = () => {
@@ -40,7 +71,7 @@ const ProductsPage = () => {
     <>
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
         {/* Hero / Banner */}
-        <section className="relative bg-gradient-to-r from-orange-600 via-red-500 to-rose-500 text-white py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
+        <section className="relative bg-gradient-to-br from-orange-500 to-red-600 text-white py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
           {/* Decorative Blobs */}
           <div className="absolute inset-0 opacity-30">
             <div className="absolute -top-10 sm:-top-20 -left-10 sm:-left-20 w-40 h-40 sm:w-72 sm:h-72 bg-orange-400 rounded-full blur-2xl sm:blur-3xl animate-pulse" />
@@ -53,7 +84,12 @@ const ProductsPage = () => {
               transition={{ duration: 0.7 }}
               className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 sm:mb-6 drop-shadow-lg"
             >
-              Our Products
+              <div className="flex items-center justify-center space-x-4 mb-4 sm:mb-6 drop-shadow-lg">
+  <Package className="w-12 h-12 sm:w-16 sm:h-16" />
+  <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+    Products
+  </h1>
+</div>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -167,19 +203,21 @@ const ProductsPage = () => {
                   }`}
                 >
                   {/* Image */}
-                  <div
-                    className={`${
-                      viewMode === 'list' 
-                        ? 'w-full sm:w-40 md:w-48 lg:w-56 h-40 sm:h-40 md:h-48 lg:h-48 flex-shrink-0' 
-                        : 'h-40 sm:h-48 md:h-56 lg:h-64'
-                    } overflow-hidden`}
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1635865165118-917ed9e20936"
-                      alt={product.name}
-                      className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </div>
+                 <div
+  className={`${
+    viewMode === 'list'
+      ? 'w-full sm:w-40 md:w-48 lg:w-56 h-40 sm:h-40 md:h-48 lg:h-48 flex-shrink-0'
+      : 'h-40 sm:h-48 md:h-56 lg:h-64'
+  } overflow-hidden`}
+>
+  <img
+    src={product.image}
+    alt={product.name}
+    className={`w-full ${viewMode === 'list' ? 'sm:w-40 sm:h-40' : 'h-48'} object-contain rounded-t-2xl sm:rounded-l-3xl`}
+    loading="lazy"
+  />
+</div>
+
 
                   {/* Content */}
                   <div className={`p-4 sm:p-5 md:p-6 ${viewMode === 'list' ? 'flex-1 w-full' : ''}`}>
@@ -197,11 +235,20 @@ const ProductsPage = () => {
                       >
                         Ask for Quote
                       </button>
-                      <button
-                        className="flex-1 px-4 py-2 sm:py-3 rounded-xl border border-orange-300 text-orange-600 hover:bg-orange-50 text-sm sm:text-base font-medium transition"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          className="flex-1 px-3 py-2 sm:py-3 rounded-xl border border-orange-300 text-orange-600 hover:bg-orange-50 text-sm sm:text-base font-medium transition"
+                        >
+                          View Details
+                        </button>
+                        <button
+                          className="p-2 sm:p-3 rounded-xl border border-orange-300 text-orange-600 hover:bg-orange-50 transition flex-shrink-0"
+                          onClick={() => handleQRView(product)}
+                          title="View QR Code"
+                        >
+                          <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -221,7 +268,7 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Simple Modal */}
+      {/* Quote Modal */}
       {isModalOpen && selectedProduct && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <motion.div
@@ -247,6 +294,43 @@ const ProductsPage = () => {
                 </button>
                 <button 
                   onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-600 rounded-xl font-medium text-sm sm:text-base"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {isQRModalOpen && selectedProductForQR && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-sm sm:max-w-md w-full"
+          >
+            <div className="text-center">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+                QR Code
+              </h3>
+              <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                {selectedProductForQR.name}
+              </p>
+              {/* QR Code Image */}
+              <div className="bg-gray-100 rounded-xl p-4 mb-6 flex items-center justify-center">
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/product/"
+                  alt="QR Code"
+                  className="w-48 h-48 object-contain"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+               
+                <button 
+                  onClick={() => setIsQRModalOpen(false)}
                   className="flex-1 px-4 py-3 border border-gray-300 text-gray-600 rounded-xl font-medium text-sm sm:text-base"
                 >
                   Close
