@@ -1,0 +1,1136 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeYatra - AI Powered Safety System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                }
+            },
+            fontFamily: {
+                sans: ["Inter", "system-ui", "sans-serif"],
+            }
+        },
+    };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --background: hsl(210 40% 98%);
+            --foreground: hsl(222.2 84% 4.9%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222.2 84% 4.9%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(222.2 84% 4.9%);
+            --primary: hsl(207 90% 35%);
+            --primary-foreground: hsl(210 40% 98%);
+            --secondary: hsl(210 40% 96%);
+            --secondary-foreground: hsl(222.2 84% 4.9%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(215.4 16.3% 46.9%);
+            --accent: hsl(210 40% 96%);
+            --accent-foreground: hsl(222.2 84% 4.9%);
+            --destructive: hsl(0 84% 50%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(214.3 31.8% 91.4%);
+            --input: hsl(214.3 31.8% 91.4%);
+            --ring: hsl(207 90% 35%);
+            --radius: 0.75rem;
+        }
+        
+        .dark {
+            --background: hsl(222.2 84% 4.9%);
+            --foreground: hsl(210 40% 98%);
+            --card: hsl(222.2 84% 4.9%);
+            --card-foreground: hsl(210 40% 98%);
+            --popover: hsl(222.2 84% 4.9%);
+            --popover-foreground: hsl(210 40% 98%);
+            --primary: hsl(207 90% 54%);
+            --primary-foreground: hsl(222.2 84% 4.9%);
+            --secondary: hsl(217.2 32.6% 17.5%);
+            --secondary-foreground: hsl(210 40% 98%);
+            --muted: hsl(217.2 32.6% 17.5%);
+            --muted-foreground: hsl(215 20.2% 65.1%);
+            --accent: hsl(217.2 32.6% 17.5%);
+            --accent-foreground: hsl(210 40% 98%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(217.2 32.6% 17.5%);
+            --input: hsl(217.2 32.6% 17.5%);
+            --ring: hsl(207 90% 54%);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sos-button {
+            box-shadow: 0 0 30px rgba(211, 47, 47, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .sos-button:hover {
+            box-shadow: 0 0 40px rgba(211, 47, 47, 0.6);
+            transform: scale(1.05);
+        }
+
+        .heatmap-marker {
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .heatmap-marker:hover {
+            transform: scale(1.2);
+        }
+
+        .safe { background-color: #4CAF50; }
+        .moderate { background-color: #FF9800; }
+        .crowded { background-color: #F44336; }
+    </style>
+</head>
+<body class="bg-background text-foreground font-sans">
+    <!-- @COMPONENT: LandingPage -->
+    <div id="landingPage" class="min-h-screen bg-gradient-to-br from-primary/5 to-accent/10">
+        <!-- Header -->
+        <header class="border-b border-border bg-card shadow-sm">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-primary-foreground text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-foreground" data-bind="app.name">SafeYatra</h1>
+                            <p class="text-sm text-muted-foreground">AI-Powered Safety System</p>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-4">
+                        <span class="text-sm text-muted-foreground">Simhastha 2028</span>
+                        <div class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></div>
+                        <span class="text-sm font-medium text-foreground">System Active</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="container mx-auto px-4 py-16">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-4xl md:text-6xl font-bold text-foreground mb-6">
+                    AI-Powered Safety System<br>
+                    <span class="text-primary">for Simhastha 2028</span>
+                </h2>
+                <p class="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+                    Advanced emergency response and real-time crowd monitoring to ensure pilgrim safety during the sacred gathering.
+                </p>
+
+                <!-- Feature Cards -->
+                <div class="grid md:grid-cols-3 gap-8 mb-16">
+                    <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+                        <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-helicopter text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">AeroRover-X Monitoring</h3>
+                        <p class="text-muted-foreground">Advanced drone surveillance for real-time area monitoring</p>
+                    </div>
+                    <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+                        <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-map-marked-alt text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Real-time Heatmaps</h3>
+                        <p class="text-muted-foreground">Live crowd density visualization and safe route guidance</p>
+                    </div>
+                    <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+                        <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-ambulance text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Emergency Response</h3>
+                        <p class="text-muted-foreground">Sub-5 minute response time for all emergency situations</p>
+                    </div>
+                </div>
+
+                <!-- Portal Selection -->
+                <div class="bg-card border border-border rounded-xl p-8 shadow-lg max-w-2xl mx-auto">
+                    <h3 class="text-2xl font-bold mb-8">Choose Your Portal</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <button onclick="showPilgrimApp()" class="group bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-8 rounded-xl transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-mobile-alt text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
+                            <h4 class="text-xl font-bold mb-2">Pilgrim App</h4>
+                            <p class="text-blue-100">For pilgrims and visitors</p>
+                            <div class="mt-4 text-sm bg-blue-600/30 rounded-lg p-2">
+                                SOS • Safe Routes • Crowd Updates
+                            </div>
+                        </button>
+                        <button onclick="showCommandCenter()" class="group bg-gradient-to-br from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white p-8 rounded-xl transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-desktop text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
+                            <h4 class="text-xl font-bold mb-2">Command Center</h4>
+                            <p class="text-gray-300">For authorized personnel</p>
+                            <div class="mt-4 text-sm bg-gray-600/30 rounded-lg p-2">
+                                Admin • Police • Medical • Coordinator
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- @END_COMPONENT: LandingPage -->
+
+    <!-- @COMPONENT: PilgrimApp -->
+    <div id="pilgrimApp" class="hidden min-h-screen bg-background">
+        <!-- OTP Login Screen -->
+        <div id="pilgrimLogin" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/10 p-4">
+            <div class="w-full max-w-md">
+                <div class="bg-card border border-border rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-primary-foreground text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-foreground">Pilgrim Login</h2>
+                        <p class="text-muted-foreground mt-2">Enter your details to access safety features</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <!-- Contact Method Toggle -->
+                        <div class="flex bg-muted rounded-lg p-1">
+                            <button type="button" onclick="toggleContactMethod('email')" id="emailTab" class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground">
+                                Email
+                            </button>
+                            <button type="button" onclick="toggleContactMethod('phone')" id="phoneTab" class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-muted-foreground">
+                                Phone
+                            </button>
+                        </div>
+
+                        <!-- Email Input -->
+                        <div id="emailInput" class="space-y-2">
+                            <label class="text-sm font-medium text-foreground">Email Address</label>
+                            <input type="email" class="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background" placeholder="your.email@example.com" data-mock="true">
+                        </div>
+
+                        <!-- Phone Input -->
+                        <div id="phoneInput" class="hidden space-y-2">
+                            <label class="text-sm font-medium text-foreground">Phone Number</label>
+                            <input type="tel" class="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background" placeholder="+91 98765 43210" data-mock="true">
+                        </div>
+
+                        <button type="button" onclick="showOTPVerification()" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-medium transition-colors">
+                            Send OTP
+                        </button>
+                    </form>
+
+                    <div class="mt-6 text-center">
+                        <button onclick="showLandingPage()" class="text-primary hover:text-primary/80 text-sm">
+                            ← Back to Portal Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OTP Verification -->
+        <div id="otpVerification" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/10 p-4">
+            <div class="w-full max-w-md">
+                <div class="bg-card border border-border rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-key text-white text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-foreground">Verify OTP</h2>
+                        <p class="text-muted-foreground mt-2">Enter the 6-digit code sent to your device</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div class="flex justify-center space-x-3">
+                            <!-- @MAP: Array(6).fill(0).map((_, i) => ( -->
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <!-- @END_MAP )) -->
+                        </div>
+
+                        <button type="button" onclick="showPilgrimDashboard()" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 rounded-lg font-medium transition-colors">
+                            Verify & Login
+                        </button>
+
+                        <div class="text-center">
+                            <button type="button" class="text-primary hover:text-primary/80 text-sm">
+                                Resend OTP (45s)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pilgrim Dashboard -->
+        <div id="pilgrimDashboard" class="hidden min-h-screen bg-background">
+            <!-- Header -->
+            <header class="bg-card border-b border-border shadow-sm sticky top-0 z-50">
+                <div class="px-4 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-primary-foreground"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-lg font-bold text-foreground">SafeYatra</h1>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <span class="text-xs text-muted-foreground">Connected</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="showLandingPage()" class="text-muted-foreground hover:text-foreground">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="p-4 pb-24">
+                <!-- Emergency SOS Section -->
+                <div class="mb-8">
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl p-6 text-center">
+                        <h2 class="text-lg font-bold text-red-800 mb-4">Emergency Assistance</h2>
+                        <button class="sos-button w-32 h-32 bg-red-500 hover:bg-red-600 text-white rounded-full text-2xl font-bold shadow-lg mx-auto flex items-center justify-center mb-4" data-event="click:triggerSOS">
+                            <div>
+                                <i class="fas fa-exclamation-triangle text-3xl mb-1"></i>
+                                <div class="text-sm font-bold">SOS</div>
+                            </div>
+                        </button>
+                        <p class="text-red-700 text-sm">Tap for immediate emergency assistance</p>
+                    </div>
+                </div>
+
+                <!-- Current Status -->
+                <div class="mb-6">
+                    <div class="bg-card border border-border rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+                            Current Location Status
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-muted-foreground">Crowd Level</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <span class="font-medium text-green-700" data-bind="location.crowdLevel">Safe</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-muted-foreground">Coordinates</span>
+                                <span class="font-mono text-sm" data-bind="location.coordinates">23.1815°N, 75.7804°E</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-muted-foreground">Last Updated</span>
+                                <span class="text-sm" data-bind="location.lastUpdated">2 mins ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button class="bg-card border border-border rounded-xl p-4 text-center hover:bg-accent transition-colors">
+                        <i class="fas fa-search text-blue-500 text-2xl mb-2"></i>
+                        <div class="text-sm font-medium">Lost & Found</div>
+                        <div class="text-xs text-muted-foreground">Report Missing</div>
+                    </button>
+                    <button class="bg-card border border-border rounded-xl p-4 text-center hover:bg-accent transition-colors">
+                        <i class="fas fa-route text-green-500 text-2xl mb-2"></i>
+                        <div class="text-sm font-medium">Safe Route</div>
+                        <div class="text-xs text-muted-foreground">Navigate Safely</div>
+                    </button>
+                </div>
+
+                <!-- Interactive Heatmap -->
+                <div class="mb-6">
+                    <div class="bg-card border border-border rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Crowd Heatmap</h3>
+                            <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <div class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></div>
+                                <span>Live</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Heatmap Container -->
+                        <div class="relative bg-gray-100 rounded-lg h-64 overflow-hidden">
+                            <!-- Background map placeholder -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 opacity-50"></div>
+                            
+                            <!-- Crowd markers -->
+                            <div class="heatmap-marker safe w-4 h-4" style="top: 20%; left: 30%;" title="Safe Zone - Low Crowd"></div>
+                            <div class="heatmap-marker moderate w-6 h-6" style="top: 40%; left: 60%;" title="Moderate - Medium Crowd"></div>
+                            <div class="heatmap-marker crowded w-8 h-8" style="top: 70%; left: 45%;" title="Crowded - High Density"></div>
+                            <div class="heatmap-marker safe w-4 h-4" style="top: 80%; left: 20%;" title="Safe Zone - Low Crowd"></div>
+                            <div class="heatmap-marker moderate w-5 h-5" style="top: 60%; left: 80%;" title="Moderate - Medium Crowd"></div>
+                            
+                            <!-- Current location indicator -->
+                            <div class="absolute w-6 h-6 bg-blue-500 border-4 border-white rounded-full pulse-animation" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" title="Your Location"></div>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="flex justify-center space-x-6 mt-4 text-xs">
+                            <div class="flex items-center space-x-1">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span>Safe</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                <span>Moderate</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <span>Crowded</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reminders & Announcements -->
+                <div class="space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-tint text-blue-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-medium text-blue-800">Hydration Reminder</h4>
+                                <p class="text-blue-700 text-sm">Remember to drink water regularly. Next checkpoint: 200m ahead</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-bullhorn text-amber-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-medium text-amber-800">Announcement</h4>
+                                <p class="text-amber-700 text-sm">Special Aarti ceremony starting at 6 PM at main ghat. Expected high crowd movement.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Bottom Navigation -->
+            <nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-2">
+                <div class="flex justify-around">
+                    <button class="flex flex-col items-center py-2 text-primary">
+                        <i class="fas fa-home text-xl mb-1"></i>
+                        <span class="text-xs">Home</span>
+                    </button>
+                    <button class="flex flex-col items-center py-2 text-muted-foreground">
+                        <i class="fas fa-map text-xl mb-1"></i>
+                        <span class="text-xs">Map</span>
+                    </button>
+                    <button class="flex flex-col items-center py-2 text-muted-foreground">
+                        <i class="fas fa-bell text-xl mb-1"></i>
+                        <span class="text-xs">Alerts</span>
+                    </button>
+                    <button class="flex flex-col items-center py-2 text-muted-foreground">
+                        <i class="fas fa-user text-xl mb-1"></i>
+                        <span class="text-xs">Profile</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: PilgrimApp -->
+
+    <!-- @COMPONENT: CommandCenter -->
+    <div id="commandCenter" class="hidden min-h-screen bg-background">
+        <!-- Command Center Login -->
+        <div id="commandLogin" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+            <div class="w-full max-w-md">
+                <div class="bg-card border border-border rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gray-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-shield text-white text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-foreground">Command Center</h2>
+                        <p class="text-muted-foreground mt-2">Authorized Personnel Only</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <!-- Role Selection -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-foreground">Select Role</label>
+                            <select class="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background" data-mock="true">
+                                <option>Select your role...</option>
+                                <option value="administrator">Administrator</option>
+                                <option value="police">Police</option>
+                                <option value="medical">Medical</option>
+                                <option value="coordinator">Coordinator</option>
+                            </select>
+                        </div>
+
+                        <!-- Employee ID -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-foreground">Employee ID</label>
+                            <input type="text" class="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background" placeholder="Enter your employee ID" data-mock="true">
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-foreground">Phone Number</label>
+                            <input type="tel" class="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background" placeholder="+91 98765 43210" data-mock="true">
+                        </div>
+
+                        <button type="button" onclick="showCommandOTP()" class="w-full bg-gray-700 hover:bg-gray-800 text-white py-3 rounded-lg font-medium transition-colors">
+                            Send OTP
+                        </button>
+                    </form>
+
+                    <div class="mt-6 text-center">
+                        <button onclick="showLandingPage()" class="text-primary hover:text-primary/80 text-sm">
+                            ← Back to Portal Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command Center OTP -->
+        <div id="commandOTP" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+            <div class="w-full max-w-md">
+                <div class="bg-card border border-border rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-key text-white text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-foreground">Verify Access</h2>
+                        <p class="text-muted-foreground mt-2">Enter the OTP sent to your registered device</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div class="flex justify-center space-x-3">
+                            <!-- @MAP: Array(6).fill(0).map((_, i) => ( -->
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <input type="text" maxlength="1" class="w-12 h-12 text-center border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-lg font-semibold" data-mock="true">
+                            <!-- @END_MAP )) -->
+                        </div>
+
+                        <button type="button" onclick="showCommandDashboard()" class="w-full bg-gray-700 hover:bg-gray-800 text-white py-3 rounded-lg font-medium transition-colors">
+                            Access Command Center
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command Dashboard -->
+        <div id="commandDashboard" class="hidden min-h-screen bg-background">
+            <!-- Header -->
+            <header class="bg-card border-b border-border shadow-sm">
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-shield text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-foreground">SafeYatra Command Center</h1>
+                                <div class="flex items-center space-x-4 text-sm text-muted-foreground">
+                                    <span data-bind="user.role">Administrator</span>
+                                    <span>•</span>
+                                    <span data-bind="user.id">ID: ADM001</span>
+                                    <span>•</span>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span>Online</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right text-sm">
+                                <div class="font-medium text-foreground" data-bind="currentTime">15:45 IST</div>
+                                <div class="text-muted-foreground" data-bind="currentDate">Jan 25, 2028</div>
+                            </div>
+                            <button onclick="showLandingPage()" class="text-muted-foreground hover:text-foreground">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Overview -->
+            <div class="px-6 py-6 bg-muted/50">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-card border border-border rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-muted-foreground text-sm">Total Pilgrims</p>
+                                <p class="text-2xl font-bold text-foreground" data-bind="stats.totalPilgrims">2,847,325</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-green-600">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            +12.5% from yesterday
+                        </div>
+                    </div>
+
+                    <div class="bg-card border border-border rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-muted-foreground text-sm">Active Alerts</p>
+                                <p class="text-2xl font-bold text-red-600" data-bind="stats.activeAlerts">7</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-white"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            +2 in last hour
+                        </div>
+                    </div>
+
+                    <div class="bg-card border border-border rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-muted-foreground text-sm">Drones Active</p>
+                                <p class="text-2xl font-bold text-foreground" data-bind="stats.dronesActive">24/28</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-helicopter text-white"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-green-600">
+                            <i class="fas fa-check mr-1"></i>
+                            85.7% operational
+                        </div>
+                    </div>
+
+                    <div class="bg-card border border-border rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-muted-foreground text-sm">Avg Response Time</p>
+                                <p class="text-2xl font-bold text-foreground" data-bind="stats.responseTime">3m 42s</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-green-600">
+                            <i class="fas fa-arrow-down mr-1"></i>
+                            -18s from target
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Content -->
+            <div class="px-6 py-6">
+                <!-- Tab Navigation -->
+                <div class="mb-6">
+                    <div class="border-b border-border">
+                        <nav class="flex space-x-8">
+                            <button onclick="showCommandTab('overview')" id="overviewTab" class="py-2 px-1 border-b-2 border-primary text-primary font-medium text-sm">
+                                Overview
+                            </button>
+                            <button onclick="showCommandTab('alerts')" id="alertsTab" class="py-2 px-1 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm">
+                                Live Alerts
+                            </button>
+                            <button onclick="showCommandTab('heatmap')" id="heatmapTab" class="py-2 px-1 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm">
+                                Crowd Heatmap
+                            </button>
+                            <button onclick="showCommandTab('drones')" id="dronesTab" class="py-2 px-1 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm">
+                                AeroRover-X
+                            </button>
+                            <button onclick="showCommandTab('lostfound')" id="lostfoundTab" class="py-2 px-1 border-b-2 border-transparent text-muted-foreground hover:text-foreground font-medium text-sm">
+                                Lost & Found
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="overviewContent" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Live Heatmap -->
+                        <div class="bg-card border border-border rounded-xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold">Live Crowd Heatmap</h3>
+                                <div class="flex items-center space-x-2 text-xs text-muted-foreground">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></div>
+                                    <span>Auto-refresh: 5s</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Large Heatmap -->
+                            <div class="relative bg-gray-100 rounded-lg h-80 overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 opacity-50"></div>
+                                
+                                <!-- Multiple crowd markers for detailed view -->
+                                <div class="heatmap-marker safe w-6 h-6" style="top: 15%; left: 25%;" title="Ghat 1 - Safe"></div>
+                                <div class="heatmap-marker moderate w-8 h-8" style="top: 30%; left: 55%;" title="Main Path - Moderate"></div>
+                                <div class="heatmap-marker crowded w-12 h-12" style="top: 50%; left: 40%;" title="Central Area - Crowded"></div>
+                                <div class="heatmap-marker safe w-6 h-6" style="top: 70%; left: 20%;" title="Side Path - Safe"></div>
+                                <div class="heatmap-marker moderate w-7 h-7" style="top: 80%; left: 70%;" title="Exit Route - Moderate"></div>
+                                <div class="heatmap-marker crowded w-10 h-10" style="top: 65%; left: 60%;" title="Temple Area - High Density"></div>
+                                <div class="heatmap-marker safe w-5 h-5" style="top: 25%; left: 80%;" title="Parking - Safe"></div>
+                                
+                                <!-- Grid overlay for reference -->
+                                <div class="absolute inset-0 opacity-20">
+                                    <div class="grid grid-cols-10 grid-rows-8 h-full">
+                                        <!-- @MAP: Array(80).fill(0).map((_, i) => ( -->
+                                        <div class="border border-gray-400"></div>
+                                        <!-- @END_MAP )) -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center mt-4 text-xs">
+                                <div class="flex space-x-4">
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        <span>Safe (0-30%)</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                        <span>Moderate (31-70%)</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <span>Crowded (71-100%)</span>
+                                    </div>
+                                </div>
+                                <span class="text-muted-foreground">Last updated: 2s ago</span>
+                            </div>
+                        </div>
+
+                        <!-- Team Communication Feed -->
+                        <div class="bg-card border border-border rounded-xl p-6">
+                            <h3 class="text-lg font-semibold mb-4">Team Communication</h3>
+                            
+                            <div class="space-y-4 h-80 overflow-y-auto">
+                                <!-- @MAP: communicationFeed.map(message => ( -->
+                                <div class="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                        P
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="font-medium text-sm">Police Unit 7</span>
+                                            <span class="text-xs text-muted-foreground">2 min ago</span>
+                                        </div>
+                                        <p class="text-sm">Crowd dispersing from main ghat area. Traffic flow normalizing.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-red-50 rounded-lg">
+                                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                        M
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="font-medium text-sm">Medical Team 3</span>
+                                            <span class="text-xs text-muted-foreground">5 min ago</span>
+                                        </div>
+                                        <p class="text-sm">Minor heat exhaustion case resolved. Patient stable and hydrated.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                        C
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="font-medium text-sm">Coordinator Base</span>
+                                            <span class="text-xs text-muted-foreground">8 min ago</span>
+                                        </div>
+                                        <p class="text-sm">Evening ceremony preparations complete. All security checkpoints active.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                        P
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="font-medium text-sm">Police Unit 12</span>
+                                            <span class="text-xs text-muted-foreground">12 min ago</span>
+                                        </div>
+                                        <p class="text-sm">Lost child case resolved. Family reunited at information center.</p>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+
+                            <!-- Quick Message Input -->
+                            <div class="mt-4 flex space-x-2">
+                                <input type="text" placeholder="Type urgent message..." class="flex-1 px-3 py-2 border border-input rounded-lg text-sm focus:ring-2 focus:ring-ring focus:border-transparent bg-background" data-mock="true">
+                                <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90">
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Tab -->
+                <div id="alertsContent" class="tab-content hidden">
+                    <div class="bg-card border border-border rounded-xl">
+                        <div class="px-6 py-4 border-b border-border">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold">Active Emergency Alerts</h3>
+                                <div class="flex items-center space-x-2 text-sm text-muted-foreground">
+                                    <div class="w-2 h-2 bg-red-500 rounded-full pulse-animation"></div>
+                                    <span>7 Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="divide-y divide-border">
+                            <!-- @MAP: activeAlerts.map(alert => ( -->
+                            <div class="px-6 py-4 hover:bg-accent/50 transition-colors">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center text-white">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-foreground">Medical Emergency</h4>
+                                            <p class="text-sm text-muted-foreground mt-1">Cardiac incident reported at Main Ghat Area</p>
+                                            <div class="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
+                                                <span>Location: 23.1815°N, 75.7804°E</span>
+                                                <span>•</span>
+                                                <span>Reported: 3 min ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">High Priority</span>
+                                        <button class="px-3 py-1 bg-primary text-primary-foreground text-xs rounded hover:bg-primary/90">
+                                            Respond
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-4 hover:bg-accent/50 transition-colors">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-foreground">Crowd Control Alert</h4>
+                                            <p class="text-sm text-muted-foreground mt-1">Overcrowding detected at Bridge Junction</p>
+                                            <div class="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
+                                                <span>Location: 23.1823°N, 75.7798°E</span>
+                                                <span>•</span>
+                                                <span>Reported: 7 min ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">Medium Priority</span>
+                                        <button class="px-3 py-1 bg-primary text-primary-foreground text-xs rounded hover:bg-primary/90">
+                                            Respond
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-4 hover:bg-accent/50 transition-colors">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-foreground">Missing Person</h4>
+                                            <p class="text-sm text-muted-foreground mt-1">Child separated from family near Temple Complex</p>
+                                            <div class="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
+                                                <span>Age: 8 years, Male</span>
+                                                <span>•</span>
+                                                <span>Reported: 15 min ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Active Search</span>
+                                        <button class="px-3 py-1 bg-primary text-primary-foreground text-xs rounded hover:bg-primary/90">
+                                            Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other tab contents would be implemented similarly -->
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: CommandCenter -->
+
+    <script>
+        // TODO: Replace with actual Firebase integration and state management
+        
+        (function() {
+            'use strict';
+            
+            // Application state
+            let currentView = 'landing';
+            let currentContactMethod = 'email';
+            let currentCommandTab = 'overview';
+
+            // Navigation functions
+            window.showLandingPage = function() {
+                hideAllViews();
+                document.getElementById('landingPage').classList.remove('hidden');
+                currentView = 'landing';
+            };
+
+            window.showPilgrimApp = function() {
+                hideAllViews();
+                document.getElementById('pilgrimApp').classList.remove('hidden');
+                document.getElementById('pilgrimLogin').classList.remove('hidden');
+                currentView = 'pilgrim';
+            };
+
+            window.showCommandCenter = function() {
+                hideAllViews();
+                document.getElementById('commandCenter').classList.remove('hidden');
+                document.getElementById('commandLogin').classList.remove('hidden');
+                currentView = 'command';
+            };
+
+            window.showOTPVerification = function() {
+                document.getElementById('pilgrimLogin').classList.add('hidden');
+                document.getElementById('otpVerification').classList.remove('hidden');
+            };
+
+            window.showPilgrimDashboard = function() {
+                document.getElementById('otpVerification').classList.add('hidden');
+                document.getElementById('pilgrimDashboard').classList.remove('hidden');
+            };
+
+            window.showCommandOTP = function() {
+                document.getElementById('commandLogin').classList.add('hidden');
+                document.getElementById('commandOTP').classList.remove('hidden');
+            };
+
+            window.showCommandDashboard = function() {
+                document.getElementById('commandOTP').classList.add('hidden');
+                document.getElementById('commandDashboard').classList.remove('hidden');
+            };
+
+            // Toggle contact method for pilgrim login
+            window.toggleContactMethod = function(method) {
+                const emailTab = document.getElementById('emailTab');
+                const phoneTab = document.getElementById('phoneTab');
+                const emailInput = document.getElementById('emailInput');
+                const phoneInput = document.getElementById('phoneInput');
+
+                if (method === 'email') {
+                    emailTab.classList.add('bg-primary', 'text-primary-foreground');
+                    emailTab.classList.remove('text-muted-foreground');
+                    phoneTab.classList.remove('bg-primary', 'text-primary-foreground');
+                    phoneTab.classList.add('text-muted-foreground');
+                    emailInput.classList.remove('hidden');
+                    phoneInput.classList.add('hidden');
+                } else {
+                    phoneTab.classList.add('bg-primary', 'text-primary-foreground');
+                    phoneTab.classList.remove('text-muted-foreground');
+                    emailTab.classList.remove('bg-primary', 'text-primary-foreground');
+                    emailTab.classList.add('text-muted-foreground');
+                    phoneInput.classList.remove('hidden');
+                    emailInput.classList.add('hidden');
+                }
+                currentContactMethod = method;
+            };
+
+            // Command Center tab navigation
+            window.showCommandTab = function(tab) {
+                // Hide all tab contents
+                const tabContents = document.querySelectorAll('.tab-content');
+                tabContents.forEach(content => content.classList.add('hidden'));
+
+                // Reset all tab styles
+                const tabs = ['overview', 'alerts', 'heatmap', 'drones', 'lostfound'];
+                tabs.forEach(tabName => {
+                    const tabElement = document.getElementById(tabName + 'Tab');
+                    if (tabElement) {
+                        tabElement.classList.remove('border-primary', 'text-primary');
+                        tabElement.classList.add('border-transparent', 'text-muted-foreground', 'hover:text-foreground');
+                    }
+                });
+
+                // Show selected tab content
+                const contentElement = document.getElementById(tab + 'Content');
+                if (contentElement) {
+                    contentElement.classList.remove('hidden');
+                }
+
+                // Update selected tab style
+                const selectedTab = document.getElementById(tab + 'Tab');
+                if (selectedTab) {
+                    selectedTab.classList.add('border-primary', 'text-primary');
+                    selectedTab.classList.remove('border-transparent', 'text-muted-foreground', 'hover:text-foreground');
+                }
+
+                currentCommandTab = tab;
+            };
+
+            function hideAllViews() {
+                const views = ['landingPage', 'pilgrimApp', 'commandCenter'];
+                views.forEach(view => {
+                    document.getElementById(view).classList.add('hidden');
+                });
+
+                // Reset sub-views
+                const subViews = [
+                    'pilgrimLogin', 'otpVerification', 'pilgrimDashboard',
+                    'commandLogin', 'commandOTP', 'commandDashboard'
+                ];
+                subViews.forEach(view => {
+                    const element = document.getElementById(view);
+                    if (element) {
+                        element.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Auto-focus on OTP inputs
+            function setupOTPInputs() {
+                const otpInputs = document.querySelectorAll('input[maxlength="1"]');
+                otpInputs.forEach((input, index) => {
+                    input.addEventListener('input', function() {
+                        if (this.value.length === 1 && index < otpInputs.length - 1) {
+                            otpInputs[index + 1].focus();
+                        }
+                    });
+                    
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                            otpInputs[index - 1].focus();
+                        }
+                    });
+                });
+            }
+
+            // Simulate real-time updates
+            function simulateRealTimeUpdates() {
+                // TODO: Replace with actual Firebase listeners
+                
+                // Update timestamps
+                setInterval(() => {
+                    const timeElements = document.querySelectorAll('[data-bind*="Time"]');
+                    timeElements.forEach(element => {
+                        if (element.getAttribute('data-bind').includes('currentTime')) {
+                            element.textContent = new Date().toLocaleTimeString('en-IN', { 
+                                timeZone: 'Asia/Kolkata',
+                                hour12: false 
+                            }) + ' IST';
+                        }
+                    });
+                }, 1000);
+
+                // Simulate heatmap updates every 5 seconds
+                setInterval(() => {
+                    const markers = document.querySelectorAll('.heatmap-marker');
+                    markers.forEach(marker => {
+                        // Randomly change some marker states
+                        if (Math.random() < 0.3) {
+                            const classes = ['safe', 'moderate', 'crowded'];
+                            const currentClass = classes.find(cls => marker.classList.contains(cls));
+                            marker.classList.remove(currentClass);
+                            
+                            const newClass = classes[Math.floor(Math.random() * classes.length)];
+                            marker.classList.add(newClass);
+                        }
+                    });
+                }, 5000);
+            }
+
+            // Initialize application
+            function init() {
+                setupOTPInputs();
+                simulateRealTimeUpdates();
+                
+                // Show landing page by default
+                showLandingPage();
+            }
+
+            // Start the application
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+</html>

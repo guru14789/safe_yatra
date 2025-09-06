@@ -1,0 +1,143 @@
+{
+  "projectName": "SafeYatra - AI Powered Safety System",
+  "description": "A MERN stack web app with Firebase Realtime Database for Simhastha 2028 emergency response and safety system. It provides two portals: Pilgrim App and Command Center.",
+  "frontend": {
+    "framework": "React.js",
+    "styling": "TailwindCSS",
+    "routing": "React Router",
+    "components": {
+      "LandingPage": {
+        "logo": "SafeYatra Logo",
+        "tagline": "AI-Powered Safety System for Simhastha 2028",
+        "features": [
+          "AeroRover-X Drone Monitoring",
+          "Real-time Heatmaps",
+          "Emergency Response < 5 min"
+        ],
+        "options": ["Pilgrim App", "Command Center"]
+      },
+      "PilgrimApp": {
+        "login": {
+          "method": "Email/Phone + OTP Verification"
+        },
+        "dashboard": {
+          "sosButton": "Large Red SOS Button",
+          "locationStatus": "Crowd level: Safe/Moderate/Crowded with coordinates",
+          "lostAndFound": "Report Missing Person",
+          "safeRoute": "Safe Navigation Route",
+          "heatmap": "Interactive Crowd Heatmap (green/yellow/red markers)",
+          "reminders": "Hydration, Contacts, Announcements"
+        }
+      },
+      "CommandCenter": {
+        "login": {
+          "roleSelection": ["Administrator", "Police", "Medical", "Coordinator"],
+          "otpVerification": true
+        },
+        "dashboard": {
+          "overviewStats": ["Total Pilgrims", "Active Alerts", "Drones Active", "Response Time"],
+          "tabs": {
+            "Overview": "Heatmap + Team Communication Feed",
+            "LiveAlerts": "List of active emergency alerts",
+            "CrowdHeatmap": "Real-time density visualization",
+            "AeroRoverX": "Drone status + monitoring feed",
+            "LostAndFound": "Manage missing persons reports"
+          }
+        }
+      },
+      "reusableComponents": [
+        "OTP Login Form (Email/Phone toggle)",
+        "Role Selection Dropdown",
+        "Heatmap Component (auto-refresh every 5 sec)",
+        "Team Communication Feed (with Police, Medical, Coordinator tags)"
+      ]
+    }
+  },
+  "backend": {
+    "framework": "Node.js + Express.js",
+    "database": "Firebase Realtime Database",
+    "authentication": {
+      "otp": {
+        "send": "/auth/send-otp",
+        "verify": "/auth/verify-otp"
+      },
+      "jwt": "Session management with JWT stored in cookies"
+    },
+    "apis": {
+      "pilgrim": {
+        "sos": "/pilgrim/sos",
+        "status": "/pilgrim/status",
+        "lostFound": "/pilgrim/lost-found",
+        "heatmap": "/pilgrim/heatmap"
+      },
+      "commandCenter": {
+        "overview": "/admin/overview",
+        "alerts": "/admin/alerts",
+        "heatmap": "/admin/heatmap",
+        "communication": "/admin/communication",
+        "drones": "/admin/drones",
+        "lostFound": "/admin/lost-found"
+      }
+    }
+  },
+  "firebaseDatabaseModels": {
+    "users": {
+      "userId": {
+        "name": "string",
+        "email": "string",
+        "phone": "string",
+        "role": "string",
+        "otp": "number",
+        "verified": "boolean"
+      }
+    },
+    "alerts": {
+      "alertId": {
+        "type": "string",
+        "status": "string",
+        "location": "object",
+        "timestamp": "string"
+      }
+    },
+    "lostFound": {
+      "reportId": {
+        "name": "string",
+        "details": "string",
+        "status": "string",
+        "reporter": "object"
+      }
+    },
+    "heatmaps": {
+      "mapId": {
+        "lat": "number",
+        "lng": "number",
+        "crowdLevel": "string",
+        "timestamp": "string"
+      }
+    },
+    "drones": {
+      "droneId": {
+        "status": "string",
+        "location": "object",
+        "lastActive": "string"
+      }
+    },
+    "communication": {
+      "msgId": {
+        "message": "string",
+        "unit": "Police/Medical/Coordinator",
+        "timestamp": "string"
+      }
+    }
+  },
+  "realTimeFeatures": {
+    "updates": "Firebase Realtime Database listeners for live alerts, heatmaps, and communication feed",
+    "authentication": "JWT-based sessions with cookies",
+    "roleBasedAccess": true
+  },
+  "deployment": {
+    "environmentVariables": "dotenv for secrets",
+    "database": "Firebase Realtime Database (safe-yatra)",
+    "hosting": ["Replit", "Vercel/Netlify for frontend", "Render/Heroku for backend"]
+  }
+}
